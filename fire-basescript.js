@@ -23,21 +23,45 @@ document.addEventListener("DOMContentLoaded", () => {
   const numberInput = document.getElementById("numberInput");
   const addButton = document.getElementById("addButton");
   const numbersTableBody = document.getElementById("numberTable");
+  const errorContainer = document.getElementById("errorContainer"); // ✅ Error message container
 
-  // ✅ Add Number to Firebase Realtime Database
+  // ✅ Function to display error message
+  function showError(message) {
+    errorContainer.textContent = message;
+  }
+
+  // ✅ Add Number to Firebase (Prevent Duplicates)
   addButton.addEventListener("click", () => {
+    errorContainer.textContent = ""; // Clear previous error
+
     const number = numberInput.value.trim();
-    if (number) {
-      const newNumberRef = push(numbersRef); // Generate unique ID
-      set(newNumberRef, number) // Store number in Firebase
-        .then(() => {
-          console.log("Number added successfully!");
-          numberInput.value = ""; // Clear input after adding
-        })
-        .catch((error) => console.error("Error adding number:", error));
-    } else {
-      alert("Please enter a valid number.");
+    if (!number) {
+      showError("Please enter a valid number.");
+      return;
     }
+
+    // Check if the number already exists before adding
+    onValue(numbersRef, (snapshot) => {
+      let numberExists = false;
+
+      snapshot.forEach((childSnapshot) => {
+        if (childSnapshot.val().toString() === number) {
+          numberExists = true;
+        }
+      });
+
+      if (numberExists) {
+        showError("This number already exists. Please enter a unique number.");
+      } else {
+        const newNumberRef = push(numbersRef); // Generate unique ID
+        set(newNumberRef, number) // Store number in Firebase
+          .then(() => {
+            console.log("Number added successfully!");
+            numberInput.value = ""; // Clear input after adding
+          })
+          .catch((error) => showError("Error adding number: " + error.message));
+      }
+    }, { onlyOnce: true }); // Ensures the function runs only once
   });
 
   // ✅ Listen for Realtime Updates & Display a Fixed 5x7 Table
@@ -90,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const numberId = event.target.getAttribute("data-id");
         remove(ref(db, `numbers/${numberId}`)) // ✅ Delete from Firebase
           .then(() => console.log("Number deleted successfully!"))
-          .catch((error) => console.error("Error deleting number:", error));
+          .catch((error) => showError("Error deleting number: " + error.message));
       });
     });
   });
