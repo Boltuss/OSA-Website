@@ -22,7 +22,7 @@ const numbersRef = ref(db, "numbers"); // Reference to "numbers" in Firebase
 document.addEventListener("DOMContentLoaded", () => {
   const numberInput = document.getElementById("numberInput");
   const addButton = document.getElementById("addButton");
-  const numbersTableBody = document.getElementById("numbersTableBody");
+  const numbersTableBody = document.getElementById("numberTable");
 
   // ✅ Add Number to Firebase Realtime Database
   addButton.addEventListener("click", () => {
@@ -40,22 +40,49 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ✅ Listen for Realtime Updates & Display Each Number in a New Row
+  // ✅ Listen for Realtime Updates & Display a Fixed 5x7 Table
   onValue(numbersRef, (snapshot) => {
+    let numbers = [];
+
+    // Get all stored numbers and their Firebase keys
+    snapshot.forEach((childSnapshot) => {
+      numbers.push({ key: childSnapshot.key, value: childSnapshot.val() });
+    });
+
+    // Sort numbers based on order of entry
+    numbers.sort((a, b) => a.value - b.value);
+
+    // Fill empty spaces with `null` placeholders to maintain a 5x7 structure
+    while (numbers.length < 35) {
+      numbers.push(null);
+    }
+
+    // ✅ Render a Fixed 5x7 Table
     numbersTableBody.innerHTML = ""; // Clear table before updating
 
-    snapshot.forEach((childSnapshot) => {
-      const numberValue = childSnapshot.val();
-      const numberKey = childSnapshot.key; // Unique Firebase key
-
-      // ✅ Create Table Row (One Number per Row)
+    for (let i = 0; i < 7; i++) {
       const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${numberValue}</td>
-        <td><button class="delete-btn btn btn-sm" data-id="${numberKey}" style="background-color: red; color: white;">Delete</button></td>
-      `;
+
+      for (let j = 0; j < 5; j++) {
+        const index = i * 5 + j;
+        const cell = document.createElement("td");
+
+        if (numbers[index]) {
+          cell.innerHTML = `
+            ${numbers[index].value}
+            <button class="delete-btn btn btn-sm btn-danger" data-id="${numbers[index].key}">
+              <i class="bi bi-trash"></i>
+            </button>
+          `;
+        } else {
+          cell.textContent = "-"; // Empty placeholder
+        }
+
+        row.appendChild(cell);
+      }
+
       numbersTableBody.appendChild(row);
-    });
+    }
 
     // ✅ Attach Delete Event Listeners
     document.querySelectorAll(".delete-btn").forEach((button) => {
