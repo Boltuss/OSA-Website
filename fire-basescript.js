@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </button>
           `;
         } else {
-          cell.textContent = "-"; // Empty placeholder
+          cell.textContent = ""; // Empty placeholder
         }
 
         row.appendChild(cell);

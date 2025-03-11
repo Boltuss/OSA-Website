@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (numbers[index]) {
           cell.textContent = numbers[index];
         } else {
-          cell.textContent = "-"; // Empty placeholder
+          cell.textContent = ""; // Empty placeholder
         }
 
         row.appendChild(cell);
