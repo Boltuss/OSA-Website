@@ -38,6 +38,8 @@ input[type="number"] {
 
 /* ✅ Table Header & Cells */
 .table th, .table td {
+    width: 120px;  
+    height: 60px;
     text-align: center;
     vertical-align: middle;
     padding: 15px;

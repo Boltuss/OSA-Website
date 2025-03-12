@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, { onlyOnce: true }); // Ensures the function runs only once
   });
 
-  // ✅ Listen for Realtime Updates & Display a Fixed 5x7 Table
+  // ✅ Listen for Realtime Updates & Display a Fixed 5x3 Table
   onValue(numbersRef, (snapshot) => {
     let numbers = [];
 
@@ -76,18 +76,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sort numbers based on order of entry
     numbers.sort((a, b) => a.value - b.value);
 
-    // Fill empty spaces with `null` placeholders to maintain a 5x7 structure
-    while (numbers.length < 35) {
+    // Fill empty spaces with `null` placeholders to maintain a 5x3 structure (15 slots)
+    while (numbers.length < 15) {
       numbers.push(null);
     }
 
-    // ✅ Render a Fixed 5x7 Table
+    // ✅ Render a Fixed 5x3 Table
     numbersTableBody.innerHTML = ""; // Clear table before updating
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 3; i++) { // 3 rows
       const row = document.createElement("tr");
 
-      for (let j = 0; j < 5; j++) {
+      for (let j = 0; j < 5; j++) { // 5 columns
         const index = i * 5 + j;
         const cell = document.createElement("td");
 

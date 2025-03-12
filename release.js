@@ -22,7 +22,7 @@ const numbersRef = ref(db, "numbers"); // Reference to "numbers" in Firebase
 document.addEventListener("DOMContentLoaded", () => {
   const numbersTableBody = document.getElementById("numberTable");
 
-  // ✅ Listen for Realtime Updates & Display a Fixed 3x10 Table
+  // ✅ Listen for Realtime Updates & Display a Fixed 3x5 Table
   onValue(numbersRef, (snapshot) => {
     let numbers = [];
 
@@ -34,18 +34,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sort numbers based on order of entry
     numbers.sort((a, b) => a - b);
 
-    // Fill empty spaces with `null` placeholders to maintain a 3x10 structure
-    while (numbers.length < 30) {
+    // Fill empty spaces with `null` placeholders to maintain a 3x5 structure
+    while (numbers.length < 15) {
       numbers.push(null);
     }
 
-    // ✅ Render a Fixed 3x10 Table
+    // ✅ Render a Fixed 3x5 Table
     numbersTableBody.innerHTML = ""; // Clear table before updating
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 5; i++) { // 5 rows
       const row = document.createElement("tr");
 
-      for (let j = 0; j < 3; j++) {
+      for (let j = 0; j < 3; j++) { // 3 columns
         const index = i * 3 + j;
         const cell = document.createElement("td");
         cell.style.textAlign = "center"; // Center align text
