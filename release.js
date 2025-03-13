@@ -1,8 +1,7 @@
-// Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-// Firebase Configuration
+
 const firebaseConfig = {
   apiKey: "AIzaSyCEf9If3R9r8F_JSXaxmtx0liqrMIODebo",
   authDomain: "office-of-student-affairs.firebaseapp.com",
@@ -22,7 +21,7 @@ const numbersRef = ref(db, "numbers"); // Reference to "numbers" in Firebase
 document.addEventListener("DOMContentLoaded", () => {
   const numbersTableBody = document.getElementById("numberTable");
 
-  // ✅ Listen for Realtime Updates & Display a Fixed 3x5 Table
+  //  Listen for Realtime Updates & Display a Fixed 3x5 Table
   onValue(numbersRef, (snapshot) => {
     let numbers = [];
 
@@ -39,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       numbers.push(null);
     }
 
-    // ✅ Render a Fixed 3x5 Table
+    //  Render a Fixed 3x5 Table
     numbersTableBody.innerHTML = ""; // Clear table before updating
 
     for (let i = 0; i < 5; i++) { // 5 rows

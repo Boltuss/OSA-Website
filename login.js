@@ -1,40 +1,51 @@
-document.getElementById('eyeIcon').addEventListener('click', function () {
-    const passwordField = document.getElementById('password');
-    if (passwordField.type === 'password') {
-        passwordField.type = 'text';
-        this.classList.remove('bi-eye');
-        this.classList.add('bi-eye-slash');
-    } else {
-        passwordField.type = 'password';
-        this.classList.remove('bi-eye-slash');
-        this.classList.add('bi-eye');
+import { auth } from "./firebase-auth.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const loginForm = document.getElementById("loginForm");
+    const passwordInput = document.getElementById("password");
+    const eyeIcon = document.getElementById("eyeIcon");
+
+    if (!loginForm) {
+        return;
     }
-});
 
-document.querySelector("form").addEventListener("submit", function (event) {
-    event.preventDefault(); 
+    eyeIcon.addEventListener("click", function () {
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            eyeIcon.classList.remove("bi-eye");
+            eyeIcon.classList.add("bi-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            eyeIcon.classList.remove("bi-eye-slash");
+            eyeIcon.classList.add("bi-eye");
+        }
+    });
 
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-    const message = document.getElementById("loginMessage");
+    loginForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-    message.textContent = "Logging in...";
-    message.style.color = "white";
+        const email = document.getElementById("username").value;
+        const message = document.getElementById("loginMessage");
 
-    setTimeout(() => {
-        const correctUsername = "Admin";
-        const correctPassword = "AdminOSA123";
+        console.log("", email, passwordInput.value);
 
-        if (username === correctUsername && password === correctPassword) {
-            sessionStorage.setItem("isAuthenticated", "true"); 
+        message.textContent = "Logging in...";
+        message.style.color = "white";
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, passwordInput.value);
+            console.log("", userCredential.user);
+            sessionStorage.setItem("isAuthenticated", "true");
             message.textContent = "Login successful! Redirecting...";
-            message.style.color = "white";
             setTimeout(() => {
                 window.location.href = "adminrelease.html"; 
             }, 1000);
-        } else {
-            message.textContent = "The Username or Password you have Entered is Invalid.";
+        } catch (error) {
+            console.error("", error.code, error.message);
+            message.textContent = "Invalid email or password.";
             message.style.color = "white";
         }
-    }, 1000); 
+    });
 });
