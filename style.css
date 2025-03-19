@@ -409,3 +409,12 @@ p {
 th {
     display: none;
 }
+
+@media (max-width: 768px) {
+.btn-responsive {
+    padding: 8px 12px;
+    font-size: 14px;
+    width: 75%; 
+    max-width: 300px; 
+    }
+}
