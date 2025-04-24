@@ -32,7 +32,7 @@ input[type="number"] {
     border-collapse: collapse;
     background-color: transparent !important;
     border: none !important;
-    white-space: normal;
+    white-space: nowrap;
 }
 
 .table th, .table td {

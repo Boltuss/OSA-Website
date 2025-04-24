@@ -32,12 +32,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ✅ Add Number to Firebase (Prevent Duplicates)
+  numberInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      addButton.click(); // Simulate clicking the Add button when Enter is pressed
+    }
+  });
+  
+  // Add click event listener for the Add button
   addButton.addEventListener("click", () => {
     errorContainer.textContent = ""; // Clear previous error
-
+  
     const number = numberInput.value.trim();
     if (!number) {
-      showError("Please enter a valid number.");
+      showError("Please enter a value.");
       return;
     }
 
@@ -130,16 +137,23 @@ const lostAndFoundTableBody = document.getElementById("lostinfound");
 const lostAndFoundRef = ref(db, "lost_and_found"); // Reference for Lost and Found
 
 insertButton.addEventListener("click", () => {
-    const item = itemInput.value.trim();
-    if (!item) {
-        alert("Please enter a valid item.");
-        return;
-    }
+  const item = itemInput.value.trim();
+  if (!item) {
+    alert("Please enter a valid item.");
+    return;
+  }
 
-    const newItemRef = push(lostAndFoundRef);
-    set(newItemRef, item)
-        .then(() => itemInput.value = "")
-        .catch((error) => alert("Error adding item: " + error.message));
+  const newItemRef = push(lostAndFoundRef);
+  set(newItemRef, item)
+    .then(() => itemInput.value = "") // Clear input after adding
+    .catch((error) => alert("Error adding item: " + error.message));
+});
+
+// Listen for Enter key to trigger Insert button click
+itemInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    insertButton.click(); // Simulate clicking the Insert button
+  }
 });
 
 // Display Lost and Found Items in a 5x3 Grid
