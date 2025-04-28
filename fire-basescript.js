@@ -20,6 +20,23 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const numbersRef = ref(db, "numbers"); // Reference to "numbers" in Firebase
 
+// Get Firebase Auth instance
+const auth = getAuth();
+
+// Logout functionality
+document.getElementById("logoutButton").addEventListener("click", () => {
+  signOut(auth).then(() => {
+    // Successfully signed out
+    console.log("User signed out.");
+    // Clear session to redirect to login
+    sessionStorage.setItem("isAuthenticated", "false");
+    // Redirect to login page
+    window.location.href = "login.html";
+  }).catch((error) => {
+    console.error("Error signing out: ", error);
+  });
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const numberInput = document.getElementById("numberInput");
   const addButton = document.getElementById("addButton");
@@ -37,11 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
       addButton.click(); // Simulate clicking the Add button when Enter is pressed
     }
   });
-  
+
   // Add click event listener for the Add button
   addButton.addEventListener("click", () => {
     errorContainer.textContent = ""; // Clear previous error
-  
+
     const number = numberInput.value.trim();
     if (!number) {
       showError("Please enter a value.");
@@ -94,7 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     for (let i = 0; i < 6; i++) { // 6 rows
       const row = document.createElement("tr");
-    
 
       for (let j = 0; j < 5; j++) { // 5 columns
         const index = i * 5 + j;
@@ -128,7 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
-
 
 // ------------------ Lost and Found Table Logic ------------------ //
 const itemInput = document.getElementById("lostItemInput");
