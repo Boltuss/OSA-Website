@@ -1,7 +1,7 @@
 // Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -18,207 +18,165 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const numbersRef = ref(db, "numbers"); // Reference to "numbers" in Firebase
-
-// Get Firebase Auth instance
 const auth = getAuth();
 
-// Logout functionality
-document.getElementById("logoutButton").addEventListener("click", () => {
-  signOut(auth).then(() => {
-    // Successfully signed out
-    console.log("User signed out.");
-    // Clear session to redirect to login
-    sessionStorage.setItem("isAuthenticated", "false");
-    // Redirect to login page
-    window.location.href = "login.html";
-  }).catch((error) => {
-    console.error("Error signing out: ", error);
-  });
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const numberInput = document.getElementById("numberInput");
-  const addButton = document.getElementById("addButton");
-  const numbersTableBody = document.getElementById("numberTable");
-  const errorContainer = document.getElementById("errorContainer"); // ✅ Error message container
-
-  // ✅ Function to display error message
-  function showError(message) {
-    errorContainer.textContent = message;
-  }
-
-  // ✅ Add Number to Firebase (Prevent Duplicates)
-  numberInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      addButton.click(); // Simulate clicking the Add button when Enter is pressed
-    }
-  });
-
-  // Add click event listener for the Add button
-  addButton.addEventListener("click", () => {
-    errorContainer.textContent = ""; // Clear previous error
-
-    const number = numberInput.value.trim();
-    if (!number) {
-      showError("Please enter a value.");
-      return;
-    }
-
-    // Check if the number already exists before adding
-    onValue(numbersRef, (snapshot) => {
-      let numberExists = false;
-
-      snapshot.forEach((childSnapshot) => {
-        if (childSnapshot.val().toString() === number) {
-          numberExists = true;
-        }
-      });
-
-      if (numberExists) {
-        showError("This number already exists. Please enter a unique number.");
-      } else {
-        const newNumberRef = push(numbersRef); // Generate unique ID
-        set(newNumberRef, number) // Store number in Firebase
-          .then(() => {
-            console.log("Number added successfully!");
-            numberInput.value = ""; // Clear input after adding
-          })
-          .catch((error) => showError("Error adding number: " + error.message));
-      }
-    }, { onlyOnce: true }); // Ensures the function runs only once
-  });
-
-  // ✅ Listen for Realtime Updates & Display a Fixed 5x3 Table
-  onValue(numbersRef, (snapshot) => {
-    let numbers = [];
-
-    // Get all stored numbers and their Firebase keys
-    snapshot.forEach((childSnapshot) => {
-      numbers.push({ key: childSnapshot.key, value: childSnapshot.val() });
-    });
-
-    // Sort numbers based on order of entry
-    numbers.sort((a, b) => a.value - b.value);
-
-    // Fill empty spaces with `null` placeholders to maintain a 5x3 structure (15 slots)
-    while (numbers.length < 15) {
-      numbers.push(null);
-    }
-
-    // ✅ Render a Fixed 5x3 Table
-    numbersTableBody.innerHTML = ""; // Clear table before updating
-
-    for (let i = 0; i < 6; i++) { // 6 rows
-      const row = document.createElement("tr");
-
-      for (let j = 0; j < 5; j++) { // 5 columns
-        const index = i * 5 + j;
-        const cell = document.createElement("td");
-
-        if (numbers[index]) {
-          cell.innerHTML = `
-            ${numbers[index].value}
-            <button class="delete-btn btn btn-sm btn-danger" data-id="${numbers[index].key}">
-              <i class="bi bi-trash"></i>
-            </button>
-          `;
-        } else {
-          cell.textContent = ""; // Empty placeholder
-        }
-
-        row.appendChild(cell);
-      }
-
-      numbersTableBody.appendChild(row);
-    }
-
-    // ✅ Attach Delete Event Listeners
-    document.querySelectorAll(".delete-btn").forEach((button) => {
-      button.addEventListener("click", (event) => {
-        const numberId = event.target.getAttribute("data-id");
-        remove(ref(db, `numbers/${numberId}`)) // ✅ Delete from Firebase
-          .then(() => console.log("Number deleted successfully!"))
-          .catch((error) => showError("Error deleting number: " + error.message));
-      });
-    });
-  });
-});
-
-// ------------------ Lost and Found Table Logic ------------------ //
+// DOM Elements
+const logoutButton = document.getElementById("logoutButton");
+const numberInput = document.getElementById("numberInput");
+const addButton = document.getElementById("addButton");
+const numbersTableBody = document.getElementById("numberTable");
+const errorContainer = document.getElementById("errorContainer");
 const itemInput = document.getElementById("lostItemInput");
 const insertButton = document.getElementById("insertButton");
 const lostAndFoundTableBody = document.getElementById("lostinfound");
-const lostAndFoundRef = ref(db, "lost_and_found"); // Reference for Lost and Found
+const viewCountElement = document.getElementById("view-count");
 
-insertButton.addEventListener("click", () => {
-  const item = itemInput.value.trim();
-  if (!item) {
-    alert("Please enter a valid item.");
+// Firebase Refs
+const numbersRef = ref(db, "numbers");
+const lostAndFoundRef = ref(db, "lost_and_found");
+const pageViewRef = ref(db, "pageViews/officeOfStudentAffairs");
+
+// Logout
+logoutButton?.addEventListener("click", () => {
+  signOut(auth).then(() => {
+    sessionStorage.setItem("isAuthenticated", "false");
+    window.location.href = "login.html";
+  }).catch(console.error);
+});
+
+// Show error helper
+function showError(message) {
+  if (errorContainer) errorContainer.textContent = message;
+}
+
+// Add number
+addButton?.addEventListener("click", () => {
+  showError("");
+  const number = numberInput.value.trim();
+  if (!number) {
+    showError("Please enter a value.");
     return;
   }
 
-  const newItemRef = push(lostAndFoundRef);
-  set(newItemRef, item)
-    .then(() => itemInput.value = "") // Clear input after adding
-    .catch((error) => alert("Error adding item: " + error.message));
+  onValue(numbersRef, (snapshot) => {
+    let exists = false;
+    snapshot.forEach((child) => {
+      if (child.val().toString() === number) exists = true;
+    });
+
+    if (exists) {
+      showError("This number already exists. Please enter a unique number.");
+    } else {
+      const newRef = push(numbersRef);
+      set(newRef, number).then(() => numberInput.value = "").catch(e => showError(e.message));
+    }
+  }, { onlyOnce: true });
 });
 
-// Listen for Enter key to trigger Insert button click
-itemInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    insertButton.click(); // Simulate clicking the Insert button
+// Enter key triggers add
+numberInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addButton.click();
+});
+
+// Display numbers in table
+onValue(numbersRef, (snapshot) => {
+  let numbers = [];
+  snapshot.forEach((child) => {
+    numbers.push({ key: child.key, value: child.val() });
+  });
+
+  numbers.sort((a, b) => a.value - b.value);
+
+  // Populate table
+  numbersTableBody.innerHTML = "";
+  for (let i = 0; i < 6; i++) {
+    const row = document.createElement("tr");
+    for (let j = 0; j < 5; j++) {
+      const cell = document.createElement("td");
+      const index = i * 5 + j;
+      const entry = numbers[index];
+
+      if (entry) {
+        cell.innerHTML = `
+          ${entry.value}
+          <button class="delete-btn btn btn-sm btn-danger" data-id="${entry.key}">
+            <i class="bi bi-trash"></i>
+          </button>
+        `;
+      }
+
+      row.appendChild(cell);
+    }
+    numbersTableBody.appendChild(row);
   }
 });
 
-// Display Lost and Found Items in a 5x3 Grid
+// Delete number - delegate event
+numbersTableBody?.addEventListener("click", (e) => {
+  if (e.target.closest(".delete-btn")) {
+    const btn = e.target.closest(".delete-btn");
+    const id = btn.getAttribute("data-id");
+    remove(ref(db, `numbers/${id}`)).catch(e => showError(e.message));
+  }
+});
+
+// Lost & Found - insert
+insertButton?.addEventListener("click", () => {
+  const item = itemInput.value.trim();
+  if (!item) return alert("Please enter a valid item.");
+
+  const newItemRef = push(lostAndFoundRef);
+  set(newItemRef, item).then(() => itemInput.value = "").catch(e => alert(e.message));
+});
+
+// Enter triggers insert
+itemInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") insertButton.click();
+});
+
+// Display Lost & Found
 onValue(lostAndFoundRef, (snapshot) => {
-    let items = [];
+  let items = [];
+  snapshot.forEach((child) => {
+    items.push({ key: child.key, value: child.val() });
+  });
 
-    // Get all stored items and their Firebase keys
-    snapshot.forEach((childSnapshot) => {
-        items.push({ key: childSnapshot.key, value: childSnapshot.val() });
-    });
+  // Populate table
+  lostAndFoundTableBody.innerHTML = "";
+  for (let i = 0; i < 3; i++) {
+    const row = document.createElement("tr");
+    for (let j = 0; j < 5; j++) {
+      const index = i * 5 + j;
+      const cell = document.createElement("td");
 
-    // Fill empty spaces with `null` placeholders to maintain a 5x3 structure (15 slots)
-    while (items.length < 15) {
-        items.push(null);
+      if (items[index]) {
+        cell.innerHTML = `
+          ${items[index].value}
+          <button class="delete-item-btn btn btn-sm btn-danger" data-id="${items[index].key}">
+            <i class="bi bi-trash"></i>
+          </button>
+        `;
+      }
+
+      row.appendChild(cell);
     }
+    lostAndFoundTableBody.appendChild(row);
+  }
+});
 
-    // Render a Fixed 5x3 Table
-    lostAndFoundTableBody.innerHTML = ""; // Clear table before updating
+// Delete Lost & Found item
+lostAndFoundTableBody?.addEventListener("click", (e) => {
+  if (e.target.closest(".delete-item-btn")) {
+    const btn = e.target.closest(".delete-item-btn");
+    const id = btn.getAttribute("data-id");
+    remove(ref(db, `lost_and_found/${id}`)).catch(e => alert(e.message));
+  }
+});
 
-    for (let i = 0; i < 3; i++) { // 3 rows
-        const row = document.createElement("tr");
-
-        for (let j = 0; j < 5; j++) { // 5 columns
-            const index = i * 5 + j;
-            const cell = document.createElement("td");
-
-            if (items[index]) {
-                cell.innerHTML = `
-                    ${items[index].value}
-                    <button class="delete-item-btn delete-btn btn btn-sm btn-danger" data-id="${items[index].key}">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                `;
-            } else {
-                cell.textContent = ""; // Empty placeholder
-            }
-
-            row.appendChild(cell);
-        }
-
-        lostAndFoundTableBody.appendChild(row);
-    }
-
-    // Attach Delete Event Listeners
-    document.querySelectorAll(".delete-item-btn").forEach((button) => {
-        button.addEventListener("click", (event) => {
-            const itemId = event.target.getAttribute("data-id");
-            remove(ref(db, `lost_and_found/${itemId}`)) // ✅ Delete from Firebase
-                .then(() => console.log("Item deleted successfully!"))
-                .catch((error) => alert("Error deleting item: " + error.message));
-        });
-    });
+// Retrieve and display page views without updating
+onValue(pageViewRef, (snapshot) => {
+  const count = snapshot.val() || 0;
+  if (viewCountElement) {
+    viewCountElement.innerText = count;
+  }
 });
