@@ -65,7 +65,7 @@ addButton?.addEventListener("click", () => {
     });
 
     if (exists) {
-      showError("This number already exists. Please enter a unique number.");
+      showError("This Surname already exists.");
     } else {
       const newRef = push(numbersRef);
       set(newRef, number).then(() => numberInput.value = "").catch(e => showError(e.message));

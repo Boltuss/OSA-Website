@@ -36,42 +36,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Send OTP
     sendOtpBtn.addEventListener("click", async () => {
-        const email = emailInput.value.trim();
-        statusMessage.textContent = "";
+    const email = emailInput.value.trim();
+    statusMessage.textContent = "";
 
-        if (!email) {
-            statusMessage.textContent = "Please enter a valid email address.";
-            statusMessage.style.color = "white";
-            return;
-        }
+    if (!email) {
+        statusMessage.textContent = "Please enter a valid email address.";
+        statusMessage.style.color = "white";
+        return;
+    }
 
-        const otp = Math.floor(100000 + Math.random() * 900000);
-        const encodedEmail = email.replace(/@/g, "_").replace(/\./g, "_");
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const encodedEmail = email.replace(/@/g, "_").replace(/\./g, "_");
 
-        try {
-            statusMessage.textContent = "Generating OTP...";
-            statusMessage.style.color = "white";
+    try {
+        statusMessage.textContent = "Generating OTP...";
+        statusMessage.style.color = "white";
 
-            const otpRef = ref(db, "otp/" + encodedEmail);
-            await set(otpRef, { otp: otp });
+        const otpRef = ref(db, "otp/" + encodedEmail);
+        await set(otpRef, { otp: otp });
 
-            statusMessage.textContent = "OTP stored. Sending email...";
-            statusMessage.style.color = "orange";
+        statusMessage.textContent = "OTP stored. Sending email...";
+        statusMessage.style.color = "orange";
 
-            await emailjs.send("service_c8ml4df", "template_m1jlisw", {
-                to_email: email,
-                otp_code: otp
-            });
+        await emailjs.send("service_c8ml4df", "template_m1jlisw", {
+            to_email: email,
+            otp_code: otp
+        });
 
-            otpSection.classList.remove("d-none");
-            statusMessage.textContent = "OTP sent! Please check your email.";
-            statusMessage.style.color = "white";
-        } catch (err) {
-            console.error("Error during OTP process:", err);
-            statusMessage.textContent = "Error sending OTP. Please try again.";
-            statusMessage.style.color = "white";
-        }
-    });
+        otpSection.classList.remove("d-none");
+        statusMessage.textContent = "OTP sent! Please check your email.";
+        statusMessage.style.color = "white";
+
+        sendOtpBtn.disabled = true;  // ✅ Disable button only after successful sending
+
+    } catch (err) {
+        console.error("Error during OTP process:", err);
+        statusMessage.textContent = "Error sending OTP. Please try again.";
+        statusMessage.style.color = "white";
+    }
+});
+
 
     // Verify OTP
     verifyOtpBtn.addEventListener("click", async () => {
