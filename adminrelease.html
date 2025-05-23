@@ -1,133 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Official website for the Office of Student Affairs at Technological University of the Philippines - Cavite.">
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="adminrelease.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Official website for the Office of Student Affairs at Technological University of the Philippines - Cavite.">
 
-    <title>Admin Release</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="adminrelease.css">
 
+  <title>Admin Release</title>
 </head>
-
 <body>
-
   <script>
-    // Check if the user is authenticated
     if (sessionStorage.getItem("isAuthenticated") !== "true") {
-      // If not authenticated, redirect back to login page
-      window.location.href = "login.html"; 
+      window.location.href = "login.html";
     }
-
   </script>
 
-      <nav class="navbar navbar-expand-md navbar-dark fixed-top w-100 p-1" id="navbar">
-        <div class="container-fluid">
-            <a href="https://www.tupcavite.edu.ph/" target="_blank" class="navbar-brand logo">
-                <img src="logo.png" alt="School Logo">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="fw-bold collapse navbar-collapse justify-content-end pe-5" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item ms-5 mt-2">
-                        <button class="btn btn-link nav-link" id="logoutButton">Logout</button>
-                    </li>
-                </ul>
-            </div>
-        </div>
-      </nav>
-
-    <!-- IQms -->
-    <div class="d-flex justify-content-center my-auto py-5 mt-5">
-        <div class="contact-box3 shadow-lg p-4 rounded text-center">
-
-          <label for="numberInput" class="form-label">Name and Course</label>
-          <input id="numberInput" type="text" class="form-control" placeholder="Name and Course">
-          <div class="d-flex justify-content-center gap-2 mt-2">
-            <button type="button" id="addButton" class="btn btn-primary">Add</button>
-          </div>
-          <p style="font-size: 15px !important; margin-bottom: 0; margin-top: 20px;">Format of the name and Course { Name (Course) }</p>
-          <p id="errorContainer" class="mt-1" style="color: white; font-size: 15px;"></p>
-        </div>
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top w-100 p-1" id="navbar">
+    <div class="container-fluid">
+      <a href="https://www.tupcavite.edu.ph/" target="_blank" class="navbar-brand logo">
+        <img src="logo.png" alt="School Logo">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="fw-bold collapse navbar-collapse justify-content-end pe-5" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item ms-5 mt-2">
+            <button class="btn btn-link nav-link" id="logoutButton">Logout</button>
+          </li>
+        </ul>
       </div>
-      
-      <!-- Table Section -->
-      <div class="d-flex justify-content-center mt-4">
-        <div class="contact-box4 shadow-lg p-4 rounded text-center">
-          <h2>iQms</h2>
-          <div class="table-responsive">
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="numberTable">
-                <!-- Numbers will be added dynamically here -->
-              </tbody>
-            </table>
-          </div>
-        </div>
+    </div>
+  </nav>
+
+  <!-- IQms -->
+  <div class="d-flex justify-content-center my-auto py-5 mt-5">
+    <div class="contact-box3 shadow-lg p-4 rounded text-center">
+      <label for="numberInput" class="form-label">Name and Course</label>
+      <input id="numberInput" type="text" class="form-control" placeholder="Name and Course">
+      <div class="d-flex justify-content-center gap-2 mt-2">
+        <button type="button" id="addButton" class="btn btn-primary">Add</button>
       </div>
+      <p style="font-size: 15px; margin-bottom: 0; margin-top: 20px;">Format of the name and Course { Name (Course) }</p>
+      <p id="errorContainer" class="mt-1 text-white" style="font-size: 15px;"></p>
+    </div>
+  </div>
 
+  <!-- IQms Table -->
+  <div class="d-flex justify-content-center mt-4">
+    <div class="contact-box4 shadow-lg p-4 rounded text-center">
+      <h2>iQms</h2>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr><th></th><th></th><th></th><th></th><th></th></tr>
+          </thead>
+          <tbody id="numberTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
+  <!-- Lost and Found Input -->
+  <div class="d-flex justify-content-center my-auto py-5">
+    <div class="contact-box3 shadow-lg p-4 rounded text-center">
+      <label for="lostItemInput" class="form-label">Enter Found Item</label>
+      <input type="text" id="lostItemInput" class="form-control mb-2" placeholder="Enter Found Item">
+      <div class="d-flex justify-content-center gap-2">
+        <button type="button" id="insertButton" class="btn btn-primary">Insert</button>
+      </div>
+    </div>
+  </div>
 
-    <!---------Lost and Found---------->
+  <!-- Lost and Found Table -->
+  <div class="d-flex justify-content-center mt-4">
+    <div class="contact-box4 shadow-lg p-4 rounded text-center">
+      <h2>Found</h2>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead><tr><th></th><th></th><th></th><th></th><th></th></tr></thead>
+          <tbody id="lostinfound"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-    <div class="d-flex justify-content-center my-auto py-5">
+  <!-- Lost Input -->
+  <div class="d-flex justify-content-center my-auto py-5">
   <div class="contact-box3 shadow-lg p-4 rounded text-center">
-
-    <label for="lostItemInput" class="form-label">Enter Item</label>
-    <input type="text" id="lostItemInput" class="form-control mb-2" placeholder="Enter Item">
+    <label for="lostOnlyItemInput" class="form-label">Enter Lost Item</label>
+    <input type="text" id="lostOnlyItemInput" class="form-control mb-2" placeholder="Enter Lost Item">
     <div class="d-flex justify-content-center gap-2">
-      <button type="button" id="insertButton" class="btn btn-primary">Insert</button>
+      <button type="button" id="insertLostButton" class="btn btn-primary">Insert</button>
     </div>
   </div>
 </div>
 
-<div class="d-flex justify-content-center mt-4">
-  <div class="contact-box4 shadow-lg p-4 rounded text-center">
-    <h2>Lost & Found</h2>
-    <div class="table-responsive">
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="lostinfound">
-          <!-- Lost and Found items will be added dynamically here -->
-        </tbody>
-      </table>
+  <!-- Lost Table -->
+  <div class="d-flex justify-content-center mt-4">
+    <div class="contact-box4 shadow-lg p-4 rounded text-center">
+      <h2>Lost</h2>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead><tr><th></th><th></th><th></th><th></th><th></th></tr></thead>
+          <tbody id="lost"></tbody>
+        </table>
+      </div>
     </div>
   </div>
-</div>
 
+  <div class="mt-3 text-secondary d-flex align-items-center justify-content-center mb-3">
+    <i class="bi bi-eye me-2 text-white"></i>
+    <span id="view-count" class="text-white">0</span>
+  </div>
 
-<div class="mt-3 text-secondary d-flex align-items-center justify-content-center mb-3">
-  <i class="bi bi-eye me-2" style="color: white;"></i>
-  <span id="view-count" style="color: white;">0</span>
-</div>
-
-
-    <script src="footer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="fire-basescript.js"></script>
-
+  <script src="footer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="fire-basescript.js"></script>
 </body>
 </html>

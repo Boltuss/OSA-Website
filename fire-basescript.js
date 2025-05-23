@@ -30,10 +30,14 @@ const itemInput = document.getElementById("lostItemInput");
 const insertButton = document.getElementById("insertButton");
 const lostAndFoundTableBody = document.getElementById("lostinfound");
 const viewCountElement = document.getElementById("view-count");
+const lostTableBody = document.getElementById("lost");
+const lostOnlyItemInput = document.getElementById("lostOnlyItemInput");
+const insertLostButton = document.getElementById("insertLostButton");
 
 // Firebase Refs
 const numbersRef = ref(db, "numbers");
-const lostAndFoundRef = ref(db, "lost_and_found");
+const lostItemsRef = ref(db, "lost_items");
+const lostAndFoundRef = ref(db, "found_items");
 const pageViewRef = ref(db, "pageViews/officeOfStudentAffairs");
 
 // Logout
@@ -49,7 +53,7 @@ function showError(message) {
   if (errorContainer) errorContainer.textContent = message;
 }
 
-// Add number
+// Add Surname
 addButton?.addEventListener("click", () => {
   showError("");
   const number = numberInput.value.trim();
@@ -73,21 +77,19 @@ addButton?.addEventListener("click", () => {
   }, { onlyOnce: true });
 });
 
-// Enter key triggers add
 numberInput?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") addButton.click();
 });
 
-// Display numbers in table
+// Display Surname
 onValue(numbersRef, (snapshot) => {
   let numbers = [];
   snapshot.forEach((child) => {
     numbers.push({ key: child.key, value: child.val() });
   });
 
-  numbers.sort((a, b) => a.value - b.value);
+  numbers.sort((a, b) => a.value.localeCompare(b.value));
 
-  // Populate table
   numbersTableBody.innerHTML = "";
   for (let i = 0; i < 6; i++) {
     const row = document.createElement("tr");
@@ -95,7 +97,6 @@ onValue(numbersRef, (snapshot) => {
       const cell = document.createElement("td");
       const index = i * 5 + j;
       const entry = numbers[index];
-
       if (entry) {
         cell.innerHTML = `
           ${entry.value}
@@ -104,14 +105,12 @@ onValue(numbersRef, (snapshot) => {
           </button>
         `;
       }
-
       row.appendChild(cell);
     }
     numbersTableBody.appendChild(row);
   }
 });
 
-// Delete number - delegate event
 numbersTableBody?.addEventListener("click", (e) => {
   if (e.target.closest(".delete-btn")) {
     const btn = e.target.closest(".delete-btn");
@@ -120,7 +119,7 @@ numbersTableBody?.addEventListener("click", (e) => {
   }
 });
 
-// Lost & Found - insert
+// Found Section
 insertButton?.addEventListener("click", () => {
   const item = itemInput.value.trim();
   if (!item) return alert("Please enter a valid item.");
@@ -129,19 +128,16 @@ insertButton?.addEventListener("click", () => {
   set(newItemRef, item).then(() => itemInput.value = "").catch(e => alert(e.message));
 });
 
-// Enter triggers insert
 itemInput?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") insertButton.click();
 });
 
-// Display Lost & Found
 onValue(lostAndFoundRef, (snapshot) => {
   let items = [];
   snapshot.forEach((child) => {
     items.push({ key: child.key, value: child.val() });
   });
 
-  // Populate table
   lostAndFoundTableBody.innerHTML = "";
   for (let i = 0; i < 3; i++) {
     const row = document.createElement("tr");
@@ -152,28 +148,76 @@ onValue(lostAndFoundRef, (snapshot) => {
       if (items[index]) {
         cell.innerHTML = `
           ${items[index].value}
-          <button class="delete-item-btn btn btn-sm btn-danger" data-id="${items[index].key}">
-            <i class="bi bi-trash"></i>
-          </button>
+       <button class="delete-btn btn btn-sm btn-danger" data-id="${items[index].key}">
+          <i class="bi bi-trash"></i>
+       </button>
+
         `;
       }
-
       row.appendChild(cell);
     }
     lostAndFoundTableBody.appendChild(row);
   }
 });
 
-// Delete Lost & Found item
 lostAndFoundTableBody?.addEventListener("click", (e) => {
-  if (e.target.closest(".delete-item-btn")) {
-    const btn = e.target.closest(".delete-item-btn");
+  if (e.target.closest(".delete-btn")) {
+    const btn = e.target.closest(".delete-btn");
     const id = btn.getAttribute("data-id");
-    remove(ref(db, `lost_and_found/${id}`)).catch(e => alert(e.message));
+    remove(ref(db, `found_items/${id}`)).catch(e => alert(e.message));
   }
 });
 
-// Retrieve and display page views without updating
+// Lost Section
+insertLostButton?.addEventListener("click", () => {
+  const item = lostOnlyItemInput.value.trim();
+  if (!item) return alert("Please enter a valid lost item.");
+
+  const newItemRef = push(lostItemsRef);
+  set(newItemRef, item).then(() => lostOnlyItemInput.value = "").catch(e => alert(e.message));
+});
+
+lostOnlyItemInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") insertLostButton.click();
+});
+
+onValue(lostItemsRef, (snapshot) => {
+  let items = [];
+  snapshot.forEach((child) => {
+    items.push({ key: child.key, value: child.val() });
+  });
+
+  lostTableBody.innerHTML = "";
+  for (let i = 0; i < 3; i++) {
+    const row = document.createElement("tr");
+    for (let j = 0; j < 5; j++) {
+      const index = i * 5 + j;
+      const cell = document.createElement("td");
+
+      if (items[index]) {
+        cell.innerHTML = `
+          ${items[index].value}
+          <button class="delete-btn btn btn-sm btn-danger" data-id="${items[index].key}">
+              <i class="bi bi-trash"></i>
+          </button>
+
+        `;
+      }
+      row.appendChild(cell);
+    }
+    lostTableBody.appendChild(row);
+  }
+});
+
+lostTableBody?.addEventListener("click", (e) => {
+  if (e.target.closest(".delete-btn")) {
+    const btn = e.target.closest(".delete-btn");
+    const id = btn.getAttribute("data-id");
+    remove(ref(db, `lost_items/${id}`)).catch(e => alert(e.message));
+  }
+});
+
+// Page view count
 onValue(pageViewRef, (snapshot) => {
   const count = snapshot.val() || 0;
   if (viewCountElement) {

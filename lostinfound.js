@@ -12,51 +12,50 @@ const firebaseConfig = {
   measurementId: "G-BZ02GD7C2Y"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Reference for Lost and Found
-const lostAndFoundRef = ref(db, "lost_and_found");
+const foundRef = ref(db, "found_items");
+const lostRef = ref(db, "lost_items");
 
-// Fetch and Display Lost and Found Data
+function renderTable(tableBodyId, dataObj) {
+  const tableBody = document.getElementById(tableBodyId);
+  if (!tableBody) {
+    console.error(`Table body with id '${tableBodyId}' not found`);
+    return;
+  }
+
+  tableBody.innerHTML = "";
+
+  const items = dataObj ? Object.values(dataObj) : [];
+
+  // Fill array up to 15 items (3 columns * 5 rows)
+  while (items.length < 15) {
+    items.push("");
+  }
+
+  for (let row = 0; row < 5; row++) {
+    const tr = document.createElement("tr");
+    for (let col = 0; col < 3; col++) {
+      const td = document.createElement("td");
+      td.textContent = items[row * 3 + col];
+      td.style.textAlign = "center";
+      tr.appendChild(td);
+    }
+    tableBody.appendChild(tr);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  const lostAndFoundTableBody = document.getElementById("lostinfoundd"); // ✅ Make sure this is the correct ID in your HTML
+  onValue(foundRef, (snapshot) => {
+    renderTable("found", snapshot.val());
+  }, (error) => {
+    console.error("Error fetching found items:", error);
+  });
 
-  onValue(lostAndFoundRef, (snapshot) => {
-    let items = [];
-
-    // Get all stored items and their Firebase keys
-    snapshot.forEach((childSnapshot) => {
-      items.push(childSnapshot.val());
-    });
-
-    // Fill empty spaces with `null` placeholders to maintain a 3x5 structure
-    while (items.length < 15) {
-      items.push(null);
-    }
-
-    // ✅ Render a Fixed 3x5 Table
-    lostAndFoundTableBody.innerHTML = ""; // Clear table before updating
-
-    for (let i = 0; i < 5; i++) { // 5 rows
-      const row = document.createElement("tr");
-
-      for (let j = 0; j < 3; j++) { // 3 columns
-        const index = i * 3 + j;
-        const cell = document.createElement("td");
-        cell.style.textAlign = "center"; // Center align text
-
-        if (items[index]) {
-          cell.textContent = items[index];
-        } else {
-          cell.textContent = ""; // Empty placeholder
-        }
-
-        row.appendChild(cell);
-      }
-
-      lostAndFoundTableBody.appendChild(row);
-    }
+  onValue(lostRef, (snapshot) => {
+    renderTable("lost", snapshot.val());
+  }, (error) => {
+    console.error("Error fetching lost items:", error);
   });
 });
