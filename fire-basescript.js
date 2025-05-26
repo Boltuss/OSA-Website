@@ -88,10 +88,10 @@ onValue(numbersRef, (snapshot) => {
     numbers.push({ key: child.key, value: child.val() });
   });
 
-  numbers.sort((a, b) => a.value.localeCompare(b.value));
+
 
   numbersTableBody.innerHTML = "";
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 10; i++) {
     const row = document.createElement("tr");
     for (let j = 0; j < 5; j++) {
       const cell = document.createElement("td");

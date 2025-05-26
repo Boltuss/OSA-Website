@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Render a 10x3 table
     numbersTableBody.innerHTML = ""; // Clear existing table
 
-    for (let i = 0; i < 10; i++) { // 10 rows
+    for (let i = 0; i < 17; i++) { // 45 rows
       const row = document.createElement("tr");
 
       for (let j = 0; j < 3; j++) { // 3 columns
